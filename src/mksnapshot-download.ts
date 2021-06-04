@@ -4,26 +4,15 @@ import { config } from './config'
 import extractZip from 'extract-zip'
 
 import debug from 'debug'
-const logInfo = debug('snap:info')
-const logDebug = debug('snap:debug')
+const logInfo = debug('mksnap:info')
+const logDebug = debug('mksnap:debug')
+const logError = debug('mksnap:error')
 
 // -----------------
 // Config
 // -----------------
-const { platform, versionToDownload, binDir, mksnapshotBinary } = config
+const { platform, binDir, mksnapshotBinary } = config
 let { archToDownload } = config
-
-// -----------------
-// Not supporting ARM architectures except Darwin
-// -----------------
-if (process.arch.startsWith('arm') && process.platform !== 'darwin') {
-  console.error(
-    `WARNING: mksnapshot does not run on ${process.arch}. Download 
-     https://github.com/electron/electron/releases/download/v${versionToDownload}/mksnapshot-v${versionToDownload}-${process.platform}-${process.arch}-x64.zip
-     on a x64 ${process.platform} OS to generate ${archToDownload} snapshots.`
-  )
-  process.exit(1)
-}
 
 // -----------------
 // Correct arm to arm-x64
@@ -36,13 +25,20 @@ if (
   archToDownload += '-x64'
 }
 
-logInfo({
-  platform,
-  versionToDownload,
-  archToDownload,
-  binDir,
-  mksnapshotBinary,
-})
+// -----------------
+// Not supporting ARM architectures except Darwin
+// -----------------
+function checkArmArchitectures(version: string): boolean {
+  if (process.arch.startsWith('arm') && process.platform !== 'darwin') {
+    logError(
+      `WARNING: mksnapshot does not run on ${process.arch}. Download 
+     https://github.com/electron/electron/releases/download/v${version}/mksnapshot-v${version}-${process.platform}-${process.arch}-x64.zip
+     on a x64 ${process.platform} OS to generate ${archToDownload} snapshots.`
+    )
+    return false
+  }
+  return true
+}
 
 // -----------------
 // Download
@@ -56,7 +52,24 @@ function download(version: string) {
   })
 }
 
-async function attemptDownload(version: string, tryingBaseVersion: boolean) {
+export async function attemptDownload(
+  version: string,
+  tryingBaseVersion: boolean
+) {
+  if (!checkArmArchitectures(version)) {
+    throw new Error(
+      "Architecture not supported. Run with `DEBUG='mksnap:error'` for more information"
+    )
+  }
+  if (!tryingBaseVersion) {
+    logInfo({
+      platform,
+      version,
+      archToDownload,
+      binDir,
+      mksnapshotBinary,
+    })
+  }
   try {
     const zipPath = await download(version)
     await extractZip(zipPath, { dir: binDir })
@@ -84,5 +97,3 @@ async function attemptDownload(version: string, tryingBaseVersion: boolean) {
     await attemptDownload(baseVersion, true)
   }
 }
-
-attemptDownload(versionToDownload, false)
