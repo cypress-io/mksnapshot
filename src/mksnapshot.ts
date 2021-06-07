@@ -3,6 +3,7 @@ import { Metadata } from './metadata'
 
 import debug from 'debug'
 import { runMksnapshot } from './mksnapshot-run'
+import { VersionMeta } from './config'
 const logInfo = debug('mksnap:info')
 const logDebug = debug('mksnap:debug')
 const logError = debug('mksnap:error')
@@ -35,4 +36,8 @@ export async function syncAndRun(version: string, args: string[]) {
 
   runMksnapshot(args)
   return metadata.current()
+}
+
+export function getMetadata(version: string): VersionMeta {
+  return new Metadata(version).current()
 }
