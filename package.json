@@ -1,6 +1,6 @@
 {
   "name": "@thlorenz/electron-mksnapshot",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Configurable electron version of the mksnapshot binary",
   "repository": "git@github.com:thlorenz/mksnapshot.git",
   "main": "dist/src/mksnapshot.js",
