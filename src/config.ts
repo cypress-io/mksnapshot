@@ -11,7 +11,7 @@ export type VersionMeta = Record<string, string | boolean> & {
 
 const isWindows = process.platform === 'win32'
 
-const projectRootDir = path.join(__dirname, '..')
+const projectRootDir = path.join(__dirname, '..', '..')
 const binDir = path.join(projectRootDir, 'bin')
 const mksnapshotBinary = path.join(
   binDir,

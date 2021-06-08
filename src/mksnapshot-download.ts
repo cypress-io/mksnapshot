@@ -4,6 +4,7 @@ import { config } from './config'
 import extractZip from 'extract-zip'
 
 import debug from 'debug'
+import path from 'path'
 const logInfo = debug('mksnap:info')
 const logDebug = debug('mksnap:debug')
 const logError = debug('mksnap:error')
@@ -80,6 +81,7 @@ export async function attemptDownload(
         })
       }
     }
+    return path.basename(zipPath).slice(0, -path.extname(zipPath).length)
   } catch (err) {
     // If the version was not supplied, but taken from the `package.json` version then
     // a mksnapshot version for it may not be available.
@@ -94,6 +96,7 @@ export async function attemptDownload(
     if (tryingBaseVersion) {
       throw err
     }
-    await attemptDownload(baseVersion, true)
+    const zipPath: string = await attemptDownload(baseVersion, true)
+    return zipPath
   }
 }
